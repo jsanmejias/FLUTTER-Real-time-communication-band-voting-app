@@ -20,21 +20,21 @@ class SocketService with ChangeNotifier {
 
   void _initConfig() {
     _socket = io(
-        'http://192.168.1.71:3000',
+      //http://192.168.1.71:3000
+        'https://flutter-band-names-socket.herokuapp.com/',
         OptionBuilder()
             .setTransports(['websocket'])
             .enableAutoConnect()
             .build());
-
-    //_socket.connect();
+            
+    //Use _socket connect for when you use disableAutoConnect()
+    //_socket.connect(); 
 
     _socket.onConnect((_) {
-      print('got connected');
       _serverStatus = ServerStatus.Online;
       notifyListeners();
     });
     _socket.onDisconnect((_) {
-      print('Got disconnected');
       _serverStatus = ServerStatus.Offline;
       notifyListeners();
     });

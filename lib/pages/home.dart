@@ -1,13 +1,16 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pie_chart/pie_chart.dart';
 
 import 'package:band_names/models/band.dart';
-import 'package:band_names/services/socket_service.dart';
+import 'package:band_names/provider/socket_service.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   State<HomePage> createState() => _HomePageState();
 }
@@ -105,7 +108,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   addNewBand() {
-    final textcontroller = TextEditingController();
+    final textController = TextEditingController();
 
     if (Platform.isAndroid) {
       return showDialog(
@@ -113,11 +116,11 @@ class _HomePageState extends State<HomePage> {
         builder: (_) => AlertDialog(
           title: const Text("New Band Name"),
           content: TextField(
-            controller: textcontroller,
+            controller: textController,
           ),
           actions: [
             MaterialButton(
-              onPressed: () => addBandToList(textcontroller.text),
+              onPressed: () => addBandToList(textController.text),
               elevation: 5,
               textColor: Colors.blue,
               child: const Text("Add"),
@@ -126,6 +129,30 @@ class _HomePageState extends State<HomePage> {
         ),
       );
     }
+
+     showCupertinoDialog(
+      context: context, 
+      builder: ( _ ) => CupertinoAlertDialog( 
+          title: const Text('New Band Name'),
+          content: CupertinoTextField(
+            controller: textController,
+          ),
+          actions: [
+            // en IOS se hace click afuera y no se cierra el dialog, se debe colorcar otro boton para cerrar
+            CupertinoDialogAction(
+              isDefaultAction: true, 
+              child: const Text('Add'),
+              onPressed: () => addBandToList(textController.text),
+            ),
+            CupertinoDialogAction(
+              isDefaultAction: true, 
+              child: const Text('Dismiss'),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        )
+      
+    );
   }
 
   void addBandToList(String name) {
@@ -139,7 +166,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _showGraph() {
     Map<String, double> dataMap = {
-      for (var banda in bands) banda.name.toString(): banda.votes.toDouble()
+      for (Band band in bands) band.name.toString(): band.votes.toDouble()
     };
 
     final List<Color> colorList = [
@@ -150,7 +177,7 @@ class _HomePageState extends State<HomePage> {
       Colors.yellow[50]!,
       Colors.yellow[200]!,
     ];
-    return Padding(
+    return dataMap.isNotEmpty ? Padding(
       padding: const EdgeInsets.all(15.0),
       child: PieChart(
         dataMap: dataMap,
@@ -180,6 +207,6 @@ class _HomePageState extends State<HomePage> {
         // gradientList: ---To add gradient colors---
         // emptyColorGradient: ---Empty Color gradient---
       ),
-    );
+    ) : const SizedBox.shrink();
   }
 }
